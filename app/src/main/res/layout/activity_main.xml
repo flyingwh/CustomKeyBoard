@@ -10,6 +10,7 @@
         android:id="@+id/edit_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="330dp"
         android:hint="input"/>
 
     <EditText
@@ -20,8 +21,8 @@
         android:hint="input"/>
 
 
-    <com.github.sky.keyboardlib.CustomKeyBoardView
-        android:id="@+id/keyboard"
+    <com.github.sky.keyboardlib.SecurityKeyboardView
+        android:id="@+id/skeyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"/>

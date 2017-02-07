@@ -3,7 +3,6 @@ package com.github.sky.keyboardlib;
 import android.content.Context;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
-import android.text.Editable;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -20,27 +19,125 @@ import java.util.regex.Pattern;
  * Created by fuyuxian on 2017/1/18.
  */
 
-public class CustomKeyBoard implements KeyboardView.OnKeyboardActionListener {
+public class SecurityKeyboardManager {
 
-    private static final String TAG = "CustomKeyBoard";
+    private static final String TAG = "SecurityKeyboardManager";
+
+    private static SecurityKeyboardManager sManager;
+
     private Context mContext;
-    private CustomKeyBoardView mKeyBoardView;
+    private KeyboardView mKeyBoardView;
+    private SecurityKeyboardView mKeyBoardWrapper;
     private EditText mEditText;
     private boolean mIsUpper = false;
     private Keyboard mKeyBoard;
 
-    public CustomKeyBoard(Context mContext, CustomKeyBoardView keyBoardView) {
+
+    private KeyboardView.OnKeyboardActionListener mListener = new KeyboardView.OnKeyboardActionListener() {
+        @Override
+        public void onPress(int i) {
+
+        }
+
+        @Override
+        public void onRelease(int i) {
+
+        }
+
+        @Override
+        public void onKey(int code, int[] ints) {
+            switch (code) {
+                case 123123:
+                    initNumberKeyBoard();
+                    break;
+                case 741741:
+                case 456456:
+                    initAbcKeyBoard();
+                    break;
+                case 789789:
+                    initSymbolKeyBoard();
+                    break;
+                case Keyboard.KEYCODE_SHIFT:
+                    initShiftAbc();
+                    break;
+                case Keyboard.KEYCODE_DELETE:
+                    deleteInput();
+                    break;
+                case 32: //空格
+
+                    break;
+                default:
+                    processInput(code);
+                    Log.d(TAG, "onKey: " + code + " : " + ((char) code));
+
+            }
+        }
+
+        @Override
+        public void onText(CharSequence charSequence) {
+            processInput(charSequence);
+        }
+
+        @Override
+        public void swipeLeft() {
+
+        }
+
+        @Override
+        public void swipeRight() {
+
+        }
+
+        @Override
+        public void swipeDown() {
+
+        }
+
+        @Override
+        public void swipeUp() {
+
+        }
+    };
+
+    private SecurityKeyboardManager() {
+    }
+
+    public static SecurityKeyboardManager getInstance() {
+        if (sManager == null) {
+            sManager = new SecurityKeyboardManager();
+        }
+
+        return sManager;
+    }
+
+    public void initKeyboard(Context mContext, SecurityKeyboardView keyBoardView, EditText editText) {
         this.mContext = mContext;
-        this.mKeyBoardView = keyBoardView;
-        mKeyBoardView.setVisibility(View.GONE);
+        mKeyBoardWrapper = keyBoardView;
+        this.mKeyBoardView = keyBoardView.getKeyboardView();
+        mKeyBoardWrapper.setVisibility(View.GONE);
+        setEditText(editText);
+        init();
     }
 
-    public void init() {
+    private void init() {
+        initCloseAction();
         initAbcKeyBoard();
-        mKeyBoardView.setOnKeyboardActionListener(this);
+        mKeyBoardView.setOnKeyboardActionListener(mListener);
     }
 
-    public void setEditText(EditText editText) {
+    private void initCloseAction() {
+        View view = mKeyBoardWrapper.getCloseView();
+        view.setClickable(true);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mKeyBoardWrapper.setVisibility(View.GONE);
+                mEditText.clearFocus();
+            }
+        });
+    }
+
+    private void setEditText(EditText editText) {
         this.mEditText = editText;
         disableSystemKeyBoard();
         processEditTextFocusEvent();
@@ -55,48 +152,12 @@ public class CustomKeyBoard implements KeyboardView.OnKeyboardActionListener {
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
-                    mKeyBoardView.setVisibility(View.VISIBLE);
+                    mKeyBoardWrapper.setVisibility(View.VISIBLE);
                 }
             }
         });
     }
 
-    @Override
-    public void onPress(int i) {
-
-    }
-
-    @Override
-    public void onRelease(int i) {
-
-    }
-
-    @Override
-    public void onKey(int code, int[] ints) {
-
-        switch (code) {
-            case 123123:
-                initNumberKeyBoard();
-                break;
-            case 741741:
-            case 456456:
-                initAbcKeyBoard();
-                break;
-            case 789789:
-                initSymbolKeyBoard();
-                break;
-            case Keyboard.KEYCODE_SHIFT:
-                initShiftAbc();
-                break;
-            case Keyboard.KEYCODE_DELETE:
-                deleteInput();
-                break;
-            default:
-                processInput(code);
-                Log.d(TAG, "onKey: " + code + " : " + ((char) code));
-
-        }
-    }
 
     private void processInput(int code) {
         mEditText.getText().append((char) code);
@@ -194,29 +255,4 @@ public class CustomKeyBoard implements KeyboardView.OnKeyboardActionListener {
         }
     }
 
-    @Override
-    public void onText(CharSequence charSequence) {
-        processInput(charSequence);
-        Log.d(TAG, "onText: " + charSequence);
-    }
-
-    @Override
-    public void swipeLeft() {
-
-    }
-
-    @Override
-    public void swipeRight() {
-
-    }
-
-    @Override
-    public void swipeDown() {
-
-    }
-
-    @Override
-    public void swipeUp() {
-
-    }
 }

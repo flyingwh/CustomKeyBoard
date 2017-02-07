@@ -38,7 +38,7 @@
         <Key android:horizontalGap="0.3%p"
             android:keyWidth="12.999998%p" android:codes="-1"
             android:keyEdgeFlags="left" android:isModifier="true"
-            android:keyIcon="@drawable/ic_headset_black_24dp"
+            android:keyIcon="@drawable/ic_caps_lock"
             android:isSticky="true" />
         <Key android:codes="122" android:keyLabel="z" />
         <Key android:codes="120" android:keyLabel="x" />
@@ -48,14 +48,15 @@
         <Key android:codes="110" android:keyLabel="n" />
         <Key android:codes="109" android:keyLabel="m" />
         <Key android:keyWidth="12.999998%p" android:codes="-5"
-            android:keyIcon="@drawable/ic_headset_black_24dp"
+            android:keyIcon="@drawable/ic_delete"
             android:keyEdgeFlags="right" android:isRepeatable="true"/>
     </Row>
     <Row android:rowEdgeFlags="bottom">
         <Key android:horizontalGap="0.3%p"
             android:keyWidth="23.000004%p" android:codes="123123"
             android:keyLabel="123" />
-        <Key android:keyWidth="46.999996%p" android:codes="32"/>
+        <Key android:keyWidth="46.999996%p" android:codes="32"
+            android:keyIcon="@drawable/ic_space"/>
         <Key android:keyWidth="23.000004%p" android:codes="789789"
             android:keyEdgeFlags="right" android:keyLabel="#+=" />
     </Row>
