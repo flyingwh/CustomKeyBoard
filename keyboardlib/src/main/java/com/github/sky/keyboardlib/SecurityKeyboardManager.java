@@ -1,8 +1,10 @@
 package com.github.sky.keyboardlib;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
+import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -27,10 +29,12 @@ public class SecurityKeyboardManager {
 
     private Context mContext;
     private KeyboardView mKeyBoardView;
-    private SecurityKeyboardView mKeyBoardWrapper;
+    private View mCloseView;
     private EditText mEditText;
     private boolean mIsUpper = false;
     private Keyboard mKeyBoard;
+    private AlertDialog mKeyboardDialog;
+    private View mKeyboardWrapper;
 
 
     private KeyboardView.OnKeyboardActionListener mListener = new KeyboardView.OnKeyboardActionListener() {
@@ -99,6 +103,7 @@ public class SecurityKeyboardManager {
         }
     };
 
+
     private SecurityKeyboardManager() {
     }
 
@@ -110,13 +115,89 @@ public class SecurityKeyboardManager {
         return sManager;
     }
 
-    public void initKeyboard(Context mContext, SecurityKeyboardView keyBoardView, EditText editText) {
+    public void initKeyboard(Context mContext, EditText editText) {
         this.mContext = mContext;
-        mKeyBoardWrapper = keyBoardView;
-        this.mKeyBoardView = keyBoardView.getKeyboardView();
-        mKeyBoardWrapper.setVisibility(View.GONE);
         setEditText(editText);
+        initKeyboardWindow();
         init();
+    }
+
+    private void initKeyboardWindow() {
+
+        mKeyboardWrapper = View.inflate(mContext, R.layout.input, null);
+
+
+        mKeyboardDialog = new AlertDialog.Builder(mContext, R.style.KeyboardDialog)
+                .setView(mKeyboardWrapper)
+                .create();
+
+        mKeyboardDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                resetEditTextPositionIfNeeded();
+                hideKeyboard();
+            }
+        });
+
+        mKeyboardDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                resetEditTextPositionIfNeeded();
+                hideKeyboard();
+            }
+        });
+
+        mKeyboardDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                adjustEditTextPositionIfNeeded();
+            }
+        });
+
+        mKeyBoardView = (KeyboardView) mKeyboardWrapper.findViewById(R.id.keyboard);
+        mCloseView = mKeyboardWrapper.findViewById(R.id.keyboard_view_finish);
+
+    }
+
+    private void adjustEditTextPositionIfNeeded() {
+        mKeyboardWrapper.post(new Runnable() {
+            @Override
+            public void run() {
+                int keyboardTop = getLocationOnScreenY(mKeyboardWrapper);
+
+                View rootView = mEditText.getRootView();
+
+                int height = mEditText.getHeight();
+                int editTextTop = getLocationOnScreenY(mEditText);
+                int diff = editTextTop - keyboardTop;
+                if (keyboardTop > 0 && diff > 0) {
+                    diff += height;
+                    rootView.setScrollY(diff);
+                }
+
+            }
+        });
+    }
+
+
+    private void resetEditTextPositionIfNeeded() {
+        mEditText.getRootView().setScrollY(0);
+    }
+
+    private int getLocationOnScreenY(View view) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+
+        return location[1];
+    }
+
+    private void showKeyboard() {
+        mKeyboardDialog.show();
+    }
+
+    private void hideKeyboard() {
+        mKeyboardDialog.dismiss();
+        mEditText.clearFocus();
     }
 
     private void init() {
@@ -126,13 +207,12 @@ public class SecurityKeyboardManager {
     }
 
     private void initCloseAction() {
-        View view = mKeyBoardWrapper.getCloseView();
-        view.setClickable(true);
-        view.setOnClickListener(new View.OnClickListener() {
+        mCloseView.setClickable(true);
+        mCloseView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mKeyBoardWrapper.setVisibility(View.GONE);
-                mEditText.clearFocus();
+                hideKeyboard();
+
             }
         });
     }
@@ -151,8 +231,8 @@ public class SecurityKeyboardManager {
         mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    mKeyBoardWrapper.setVisibility(View.VISIBLE);
+                if (view.hasFocus()) {
+                    showKeyboard();
                 }
             }
         });
@@ -168,8 +248,13 @@ public class SecurityKeyboardManager {
     }
 
     private void deleteInput() {
-        BaseInputConnection inputConnection = new BaseInputConnection(mEditText, true);
-        inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+        int length = mEditText.getText().length();
+        if (length > 0) {
+            mEditText.getText().delete(length - 1, length);
+        }
+
+//        BaseInputConnection inputConnection = new BaseInputConnection(mEditText, true);
+//        inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
     }
 
     private void initAbcKeyBoard() {
