@@ -14,6 +14,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EditText editText = (EditText) findViewById(R.id.edit);
-        SecurityKeyboardManager.getInstance().initKeyboard(this, editText);
+        SecurityKeyboardManager.getInstance().initKeyboard(this, "sky安全键盘", editText);
     }
 }

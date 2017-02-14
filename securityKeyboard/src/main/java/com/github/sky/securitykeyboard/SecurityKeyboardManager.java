@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +101,7 @@ public class SecurityKeyboardManager {
 
         }
     };
+    private String mTitle = "安全键盘";
 
 
     private SecurityKeyboardManager() {
@@ -113,8 +115,9 @@ public class SecurityKeyboardManager {
         return sManager;
     }
 
-    public void initKeyboard(Context mContext, EditText editText) {
+    public void initKeyboard(Context mContext, String title, EditText editText) {
         this.mContext = mContext;
+        mTitle = title;
         setEditText(editText);
         initKeyboardWindow();
         init();
@@ -124,6 +127,9 @@ public class SecurityKeyboardManager {
 
         mKeyboardWrapper = View.inflate(mContext, R.layout.input, null);
 
+        //init title
+        TextView title = (TextView) mKeyboardWrapper.findViewById(R.id.title);
+        title.setText(mTitle);
 
         mKeyboardDialog = new AlertDialog.Builder(mContext, R.style.KeyboardDialog)
                 .setView(mKeyboardWrapper)
@@ -250,9 +256,6 @@ public class SecurityKeyboardManager {
         if (length > 0) {
             mEditText.getText().delete(length - 1, length);
         }
-
-//        BaseInputConnection inputConnection = new BaseInputConnection(mEditText, true);
-//        inputConnection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
     }
 
     private void initAbcKeyBoard() {
